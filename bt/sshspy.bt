@@ -1,0 +1,10 @@
+/*
+====SSHSPY====
+This tool spies on the data written to and from SSH connections! 
+Oh sure,it's tunneled traffic, but not to the kernel!
+*/
+
+BEGIN
+{
+  printf("Spying on SSH Connections...");
+}
