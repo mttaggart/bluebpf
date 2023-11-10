@@ -1,0 +1,59 @@
+#!/usr/bin/env bpftrace
+
+/*
+This command monitors for any shell executions.
+Must be run with --unsafe
+If -k is provided, runs in KILL MODE, meaning unauthorized shells will be murdalized
+ */
+
+BEGIN
+{
+  @kill_mode = 0;
+  printf("Starting shell monitoring at: ");
+  time();
+  if (strncmp(str($1), "-k", 2) || strncmp(str($2), "-k", 2)) {
+    printf("Activating in KILL MODE\n");
+    @kill_mode = 1;
+  }
+}
+
+tracepoint:syscalls:sys_enter_execve*
+/comm == "bash" || comm == "fish" || comm == "zsh" || comm == "dash" || comm == "sh"/
+{
+  if (comm == "bash") {
+    @bash[uid] = count();
+  }
+  if (comm == "dash") {
+    @dash[uid] = count();
+  }
+  if (comm == "fish") {
+    @fish[uid] = count();
+  }
+  if (comm == "sh") {
+    @sh[uid] = count();
+  }
+  if (comm == "zsh") {
+    @zsh[uid] = count();
+  }
+  time("%H:%M:%S ");
+  printf("UID [%d]: ", uid);
+  printf("%s ", comm);
+  join(args->argv);
+
+  if (uid > 0 && uid < 1000) {
+    printf("SERVICE ACCOUNT SHELL\n");
+  }
+}
+
+kprobe:*sys_execve
+/comm == "bash" && uid < 1000 && @kill_mode == 1/
+{
+  printf("KILLING UNAUTHORIZED SHELL\n");
+  signal("SIGKILL");
+}
+
+END
+{
+  printf("Ending shell tracking at: ");
+  time();
+}
