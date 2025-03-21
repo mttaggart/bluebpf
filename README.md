@@ -1,3 +1,5 @@
+# THIS REPO HAS BEEN ARCHIVED AND MOVED TO [CODEBERG](https://codeberg.org/mttaggart/bluebpf)
+
 # BlueBPF
 
 A set of [eBPF](https://ebpf.io) scripts and utilities intended for use in threat hunting and incident response.
